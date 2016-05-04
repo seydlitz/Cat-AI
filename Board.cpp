@@ -60,6 +60,7 @@ bool Board::ProcessTick(void)
 			//but not if they're inanimate
 			if(pObject->IsSentient())
 			{
+				bool CannotMove = false;
 				sf::Vector2u PredatorPosition;
 				sf::Vector2u PreyPosition;
 				if(pObject->GetHasPredator())
@@ -106,15 +107,32 @@ bool Board::ProcessTick(void)
 					if(pTile->GetPosition() == NewPosition)
 					{
 						//checking to see if tile is already occupied, then... 
+
+						//...if occupied, check...
 						if(!pTile->AddObject(&*pObject))
 						{
-							//...if the occupied is prey
+							//...if the occupied is prey...
 							if(pTile->GetObject()->GetName() == pObject->GetPrey())
 							{
 								std::cout << pObject->GetName() << " has captured the " << pTile->GetObject()->GetName() << "!\n";
 								std::cout << "Game Over!";
 								return false;
 							}
+							//...or else stay in old position
+							else
+							{CannotMove = true;}
+						}
+					}
+				}
+
+				//running a second time if CannotMove == true, to reset piece to original square.
+				if(CannotMove)
+				{
+					for(auto pTile = GameBoard.PlayingBoard.begin();pTile != GameBoard.PlayingBoard.end();pTile++)
+					{
+						if(pTile->GetPosition() == OldPosition)
+						{
+							pTile->AddObject(&*pObject);
 						}
 					}
 				}
